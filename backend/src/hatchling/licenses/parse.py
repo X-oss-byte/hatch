@@ -86,7 +86,4 @@ def normalize_license_expression(raw_license_expression: str) -> str:
     # Construct the normalized expression
     normalized_expression = ' '.join(normalized_tokens)
 
-    # Fix internal padding for parentheses
-    normalized_expression = normalized_expression.replace('( ', '(').replace(' )', ')')
-
-    return normalized_expression
+    return normalized_expression.replace('( ', '(').replace(' )', ')')

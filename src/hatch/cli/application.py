@@ -196,23 +196,17 @@ class Application(Terminal):
         # Default to -1 verbosity
         add_verbosity_flag(command, self.verbosity, adjustment=-1)
 
-        for dependency in dependencies:
-            command.append(str(dependency))
-
+        command.extend(str(dependency) for dependency in dependencies)
         with self.status_waiting(wait_message):
             self.platform.check_command(command)
 
     def get_env_directory(self, environment_type):
         directories = self.config.dirs.env
 
-        if environment_type in directories:
-            path = Path(directories[environment_type]).expand()
-            if os.path.isabs(path):
-                return path
-            else:
-                return self.project.location / path
-        else:
+        if environment_type not in directories:
             return self.data_dir / 'env' / environment_type
+        path = Path(directories[environment_type]).expand()
+        return path if os.path.isabs(path) else self.project.location / path
 
     def abort(self, text='', code=1, **kwargs):
         if text:

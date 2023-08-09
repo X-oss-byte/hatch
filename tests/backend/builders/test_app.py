@@ -24,25 +24,20 @@ class ExpectedEnvVars:
 def cargo_install(*args: Any, **kwargs: Any) -> subprocess.CompletedProcess:
     executable_name = 'pyapp.exe' if sys.platform == 'win32' else 'pyapp'
     install_command: list[str] = args[0]
-    repo_path = os.environ.get('PYAPP_REPO', '')
-    if repo_path:
+    if repo_path := os.environ.get('PYAPP_REPO', ''):
         temp_dir = install_command[install_command.index('--target-dir') + 1]
 
-        build_target = os.environ.get('CARGO_BUILD_TARGET', '')
-        if build_target:
+        if build_target := os.environ.get('CARGO_BUILD_TARGET', ''):
             executable = Path(temp_dir, build_target, 'release', executable_name)
         else:
             executable = Path(temp_dir, 'release', executable_name)
 
-        executable.parent.ensure_dir_exists()
-        executable.touch()
     else:
         temp_dir = install_command[install_command.index('--root') + 1]
 
         executable = Path(temp_dir, 'bin', executable_name)
-        executable.parent.ensure_dir_exists()
-        executable.touch()
-
+    executable.parent.ensure_dir_exists()
+    executable.touch()
     return subprocess.CompletedProcess(install_command, returncode=0, stdout=None, stderr=None)
 
 

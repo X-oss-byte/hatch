@@ -106,8 +106,7 @@ class BuilderInterface(ABC, Generic[BuilderConfigBound, PluginManagerBound]):
 
         versions = versions or self.config.versions
         if versions:
-            unknown_versions = set(versions) - set(version_api)
-            if unknown_versions:
+            if unknown_versions := set(versions) - set(version_api):
                 message = (
                     f'Unknown versions for target `{self.PLUGIN_NAME}`: {", ".join(map(str, sorted(unknown_versions)))}'
                 )

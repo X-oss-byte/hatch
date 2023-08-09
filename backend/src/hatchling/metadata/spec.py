@@ -53,11 +53,7 @@ def construct_metadata_file_1_2(metadata: ProjectMetadata, extra_dependencies: t
         metadata_file += license_start
 
         for i, line in enumerate(metadata.core.license.splitlines()):
-            if i == 0:
-                metadata_file += f'{line}\n'
-            else:
-                metadata_file += f'{indent}{line}\n'
-
+            metadata_file += f'{line}\n' if i == 0 else f'{indent}{line}\n'
     if metadata.core.keywords:
         metadata_file += f"Keywords: {','.join(metadata.core.keywords)}\n"
 
@@ -112,11 +108,7 @@ def construct_metadata_file_2_1(metadata: ProjectMetadata, extra_dependencies: t
         metadata_file += license_start
 
         for i, line in enumerate(metadata.core.license.splitlines()):
-            if i == 0:
-                metadata_file += f'{line}\n'
-            else:
-                metadata_file += f'{indent}{line}\n'
-
+            metadata_file += f'{line}\n' if i == 0 else f'{indent}{line}\n'
     if metadata.core.license_expression:
         metadata_file += f'License-Expression: {metadata.core.license_expression}\n'
 
@@ -193,11 +185,7 @@ def construct_metadata_file_2_2(metadata: ProjectMetadata, extra_dependencies: t
         metadata_file += license_start
 
         for i, line in enumerate(metadata.core.license.splitlines()):
-            if i == 0:
-                metadata_file += f'{line}\n'
-            else:
-                metadata_file += f'{indent}{line}\n'
-
+            metadata_file += f'{line}\n' if i == 0 else f'{indent}{line}\n'
     if metadata.core.license_expression:
         metadata_file += f'License-Expression: {metadata.core.license_expression}\n'
 

@@ -25,4 +25,7 @@ def get_latest_release(project):
         if release_header.startswith('## '):
             break
 
-    return re.search(r'\[(.+)\]', release_header).group(1), '\n'.join(release_lines).strip()
+    return (
+        re.search(r'\[(.+)\]', release_header)[1],
+        '\n'.join(release_lines).strip(),
+    )

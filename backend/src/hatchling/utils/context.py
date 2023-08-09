@@ -78,7 +78,7 @@ class DefaultContextFormatter(ContextFormatter):
 
 class Context:
     def __init__(self, root: str) -> None:
-        self.__root = str(root)
+        self.__root = root
 
         # Allow callers to define their own formatters with precedence
         self.__formatters: ChainMap = ChainMap()
@@ -132,12 +132,11 @@ class ContextStringFormatter(string.Formatter):
         if key in self.__formatters:
             # Avoid hard look-up and rely on `None` to indicate that the field is undefined
             return kwargs.get(str(key))
-        else:
-            try:
-                return super().get_value(key, args, kwargs)
-            except KeyError:
-                message = f'Unknown context field `{key}`'
-                raise ValueError(message) from None
+        try:
+            return super().get_value(key, args, kwargs)
+        except KeyError:
+            message = f'Unknown context field `{key}`'
+            raise ValueError(message) from None
 
     def format_field(self, value: Any, format_spec: str) -> Any:
         formatter, _, data = format_spec.partition(':')

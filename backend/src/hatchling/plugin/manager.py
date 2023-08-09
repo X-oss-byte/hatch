@@ -22,8 +22,7 @@ class PluginManager:
             self.initialized = True
 
         hook_name = f'hatch_register_{name}'
-        hook = getattr(self, hook_name, None)
-        if hook:
+        if hook := getattr(self, hook_name, None):
             hook()
 
         register = ClassRegister(getattr(self.manager.hook, hook_name), 'PLUGIN_NAME', self.third_party_plugins)

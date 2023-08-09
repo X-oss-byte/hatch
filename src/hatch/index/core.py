@@ -36,10 +36,7 @@ class PackageIndex:
             if client_key:
                 cert = (client_cert, client_key)
 
-        verify = True
-        if ca_cert:
-            verify = ca_cert
-
+        verify = ca_cert if ca_cert else True
         self.client = httpx.Client(timeout=10, transport=httpx.HTTPTransport(retries=3, verify=verify, cert=cert))
 
     def upload_artifact(self, artifact: Path, data: dict):

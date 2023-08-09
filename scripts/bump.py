@@ -34,7 +34,7 @@ def main():
         if process.returncode:
             raise OSError(process.stdout)
 
-        new_version = re.search(r'New: (.+)$', process.stdout, re.MULTILINE).group(1)
+        new_version = re.search(r'New: (.+)$', process.stdout, re.MULTILINE)[1]
     else:
         from hatchling.version.scheme.standard import StandardScheme
 

@@ -10,8 +10,8 @@ __all__ = [
     'get_requires_for_build_editable',
     'get_requires_for_build_sdist',
     'get_requires_for_build_wheel',
+    '__all__',
 ]
-__all__.append('__all__')
 
 
 def get_requires_for_build_sdist(config_settings: dict[str, Any] | None = None) -> list[str]:

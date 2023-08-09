@@ -52,12 +52,14 @@ class StandardScheme(VersionSchemeInterface):
                     raise ValueError(message)
 
                 next_version = Version(version)
-                if self.config.get('validate-bump', True) and next_version <= original:
-                    message = f'Version `{version}` is not higher than the original version `{original_version}`'
-                    raise ValueError(message)
-                else:
+                if (
+                    not self.config.get('validate-bump', True)
+                    or next_version > original
+                ):
                     return str(next_version)
 
+                message = f'Version `{version}` is not higher than the original version `{original_version}`'
+                raise ValueError(message)
         return str(original)
 
 
@@ -82,9 +84,10 @@ def reset_version_parts(version: Version, **kwargs: Any) -> None:
 
 def update_release(original_version: Version, new_release_parts: list[int]) -> tuple[int, ...]:
     # Retain release length
-    for _ in range(len(original_version.release) - len(new_release_parts)):
-        new_release_parts.append(0)
-
+    new_release_parts.extend(
+        0
+        for _ in range(len(original_version.release) - len(new_release_parts))
+    )
     return tuple(new_release_parts)
 
 
