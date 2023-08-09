@@ -110,12 +110,11 @@ class ProjectMetadata(Generic[PluginManagerBound]):
         # Duplicate the name parsing here for situations where it's
         # needed but metadata plugins might not be available
         if self._name is None:
-            name = self.core_raw_metadata.get('name', '')
-            if not name:
-                message = 'Missing required field `project.name`'
-                raise ValueError(message)
+            if name := self.core_raw_metadata.get('name', ''):
+                self._name = normalize_project_name(name)
 
-            self._name = normalize_project_name(name)
+            else:
+                raise ValueError('Missing required field `project.name`')
 
         return self._name
 
@@ -163,8 +162,7 @@ class ProjectMetadata(Generic[PluginManagerBound]):
             # Save the fields
             _ = self.dynamic
 
-            metadata_hooks = self.hatch.metadata.hooks
-            if metadata_hooks:
+            if metadata_hooks := self.hatch.metadata.hooks:
                 static_fields = set(self.core_raw_metadata)
                 if 'version' in self.hatch.config:
                     self._version = self._get_version(metadata)
@@ -418,14 +416,7 @@ class CoreMetadata:
         version: str
 
         if self._version is None:
-            if 'version' not in self.config:
-                if not self._version_set and 'version' not in self.dynamic:
-                    message = (
-                        'Field `project.version` can only be resolved dynamically '
-                        'if `version` is in field `project.dynamic`'
-                    )
-                    raise ValueError(message)
-            else:
+            if 'version' in self.config:
                 if 'version' in self.dynamic:
                     message = (
                         'Metadata field `version` cannot be both statically defined and '
@@ -434,12 +425,18 @@ class CoreMetadata:
                     raise ValueError(message)
 
                 version = self.config['version']
-                if not isinstance(version, str):
-                    message = 'Field `project.version` must be a string'
-                    raise TypeError(message)
+                if isinstance(version, str):
+                    self._version = version
 
-                self._version = version
+                else:
+                    raise TypeError('Field `project.version` must be a string')
 
+            elif not self._version_set and 'version' not in self.dynamic:
+                message = (
+                    'Field `project.version` can only be resolved dynamically '
+                    'if `version` is in field `project.dynamic`'
+                )
+                raise ValueError(message)
         return cast(str, self._version)
 
     @property
@@ -759,9 +756,11 @@ class CoreMetadata:
                         raise TypeError(message)
 
                     full_pattern = os.path.normpath(os.path.join(self.root, pattern))
-                    for path in glob(full_pattern):
-                        if os.path.isfile(path):
-                            license_files.append(os.path.relpath(path, self.root).replace('\\', '/'))
+                    license_files.extend(
+                        os.path.relpath(path, self.root).replace('\\', '/')
+                        for path in glob(full_pattern)
+                        if os.path.isfile(path)
+                    )
             else:
                 message = 'Must specify either `paths` or `globs` in the `project.license-files` table if defined'
                 raise ValueError(message)

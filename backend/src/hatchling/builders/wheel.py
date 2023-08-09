@@ -392,9 +392,9 @@ class WheelBuilder(BuilderInterface):
 
         build_data['tag'] = self.get_default_tag()
 
-        with WheelArchive(
-            self.artifact_project_id, reproducible=self.config.reproducible
-        ) as archive, RecordFile() as records:
+        with (WheelArchive(
+                self.artifact_project_id, reproducible=self.config.reproducible
+            ) as archive, RecordFile() as records):
             exposed_packages = {}
             for included_file in self.recurse_selected_project_files():
                 if not included_file.path.endswith('.py'):
@@ -452,9 +452,6 @@ class WheelBuilder(BuilderInterface):
             for dependency in editable_project.dependencies():
                 if dependency == 'editables':
                     dependency += f'~={EDITABLES_MINIMUM_VERSION}'
-                else:  # no cov
-                    pass
-
                 extra_dependencies.append(dependency)
 
             self.write_data(archive, records, build_data, extra_dependencies)
@@ -549,8 +546,7 @@ Root-Is-Purelib: {'true' if build_data['pure_python'] else 'false'}
         records.write(record)
 
     def write_entry_points_file(self, archive: WheelArchive, records: RecordFile) -> None:
-        entry_points_file = self.construct_entry_points_file()
-        if entry_points_file:
+        if entry_points_file := self.construct_entry_points_file():
             record = archive.write_metadata('entry_points.txt', entry_points_file)
             records.write(record)
 
@@ -571,7 +567,9 @@ Root-Is-Purelib: {'true' if build_data['pure_python'] else 'false'}
 
     def add_extra_metadata(self, archive: WheelArchive, records: RecordFile, build_data: dict[str, Any]) -> None:
         extra_metadata = dict(self.config.extra_metadata)
-        extra_metadata.update(normalize_inclusion_map(build_data['extra_metadata'], self.root))
+        extra_metadata |= normalize_inclusion_map(
+            build_data['extra_metadata'], self.root
+        )
 
         for extra_metadata_file in self.recurse_explicit_files(extra_metadata):
             record = archive.add_extra_metadata_file(extra_metadata_file)
@@ -623,8 +621,7 @@ Root-Is-Purelib: {'true' if build_data['pure_python'] else 'false'}
                 import platform
                 import re
 
-                archs = re.findall(r'-arch (\S+)', archflags)
-                if archs:
+                if archs := re.findall(r'-arch (\S+)', archflags):
                     plat = tag_parts[2]
                     current_arch = platform.mac_ver()[2]
                     new_arch = 'universal2' if set(archs) == {'x86_64', 'arm64'} else archs[0]
@@ -634,8 +631,7 @@ Root-Is-Purelib: {'true' if build_data['pure_python'] else 'false'}
                 import re
 
                 plat = tag_parts[2]
-                sdk_match = re.search(r'macosx_(\d+_\d+)', plat)
-                if sdk_match:
+                if sdk_match := re.search(r'macosx_(\d+_\d+)', plat):
                     sdk_version_part = sdk_match.group(1)
                     if tuple(map(int, sdk_version_part.split('_'))) >= (11, 0):
                         tag_parts[2] = plat.replace(sdk_version_part, '10_16', 1)

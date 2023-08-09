@@ -207,15 +207,14 @@ class CachedUserFile:
     @property
     def data(self):
         if self._data is None:
-            if not self.path.is_file():
-                self._data = {}
-            else:
-                contents = self.path.read_text()
-                if not contents:  # no cov
-                    self._data = {}
-                else:
+            if self.path.is_file():
+                if contents := self.path.read_text():
                     import json
 
                     self._data = json.loads(contents)
 
+                else:
+                    self._data = {}
+            else:
+                self._data = {}
         return self._data

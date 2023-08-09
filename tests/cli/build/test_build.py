@@ -780,7 +780,7 @@ def test_hooks_only(hatch, temp_dir, helpers, config_file):
     assert build_directory.is_dir()
 
     artifacts = list(build_directory.iterdir())
-    assert len(artifacts) == 0
+    assert not artifacts
     assert (path / 'my_app' / 'lib.so').is_file()
 
     assert result.output == helpers.dedent(
@@ -835,7 +835,7 @@ def test_hooks_only_env_var(hatch, temp_dir, helpers, config_file):
     assert build_directory.is_dir()
 
     artifacts = list(build_directory.iterdir())
-    assert len(artifacts) == 0
+    assert not artifacts
     assert (path / 'my_app' / 'lib.so').is_file()
 
     assert result.output == helpers.dedent(
@@ -890,7 +890,7 @@ def test_extensions_only(hatch, temp_dir, helpers, config_file):
     assert build_directory.is_dir()
 
     artifacts = list(build_directory.iterdir())
-    assert len(artifacts) == 0
+    assert not artifacts
     assert (path / 'my_app' / 'lib.so').is_file()
 
     assert result.output == helpers.dedent(

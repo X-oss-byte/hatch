@@ -159,8 +159,9 @@ class Platform:
 
             search_path = os.pathsep.join(unprotected_paths)
             for exe_name in ('sh', 'bash', 'zsh', 'fish'):
-                executable = self.modules.shutil.which(exe_name, path=search_path)
-                if executable:
+                if executable := self.modules.shutil.which(
+                    exe_name, path=search_path
+                ):
                     kwargs['executable'] = executable
                     break
 

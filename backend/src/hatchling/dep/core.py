@@ -50,8 +50,7 @@ def dependency_in_sync(
     if distribution is None:
         return False
 
-    extras = requirement.extras
-    if extras:
+    if extras := requirement.extras:
         transitive_requirements: list[str] = distribution.metadata.get_all('Requires-Dist', [])
         if not transitive_requirements:
             return False
@@ -76,7 +75,6 @@ def dependency_in_sync(
 
     if requirement.specifier and not requirement.specifier.contains(distribution.version):
         return False
-    # TODO: handle https://discuss.python.org/t/11938
     elif requirement.url:
         direct_url_file = distribution.read_text('direct_url.json')
         if direct_url_file is not None:
@@ -96,16 +94,17 @@ def dependency_in_sync(
                     requested_revision and requirement.url == f'{vcs}+{url}@{requested_revision}#{commit_id}'
                 ) or requirement.url == f'{vcs}+{url}@{commit_id}':
                     return True
-                elif requirement.url == f'{vcs}+{url}' or requirement.url == f'{vcs}+{url}@{requested_revision}':
+                elif requirement.url in [
+                    f'{vcs}+{url}',
+                    f'{vcs}+{url}@{requested_revision}',
+                ]:
                     import subprocess
 
-                    if vcs == 'git':
-                        vcs_cmd = [vcs, 'ls-remote', url]
-                        if requested_revision:
-                            vcs_cmd.append(requested_revision)
-                    # TODO: add elifs for hg, svn, and bzr https://github.com/pypa/hatch/issues/760
-                    else:
+                    if vcs != 'git':
                         return False
+                    vcs_cmd = [vcs, 'ls-remote', url]
+                    if requested_revision:
+                        vcs_cmd.append(requested_revision)
                     result = subprocess.run(vcs_cmd, capture_output=True, text=True)
                     if result.returncode:
                         return False

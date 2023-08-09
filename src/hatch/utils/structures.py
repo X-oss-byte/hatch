@@ -35,10 +35,10 @@ class EnvVars(dict):
 
     def __enter__(self) -> None:
         os.environ.clear()
-        os.environ.update(self)
+        os.environ |= self
 
     def __exit__(
         self, exc_type: type[BaseException] | None, exc_value: BaseException | None, traceback: TracebackType | None
     ) -> None:
         os.environ.clear()
-        os.environ.update(self.old_env)
+        os.environ |= self.old_env

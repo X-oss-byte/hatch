@@ -88,12 +88,10 @@ class BuilderConfig:
         return (
             self.path_is_build_artifact(relative_path)
             or self.path_is_artifact(relative_path)
-            or (
-                not (self.only_packages and not is_package)
-                and not self.path_is_reserved(relative_path)
-                and not self.path_is_excluded(relative_path)
-                and (explicit or self.path_is_included(relative_path))
-            )
+            or (not self.only_packages or is_package)
+            and not self.path_is_reserved(relative_path)
+            and not self.path_is_excluded(relative_path)
+            and (explicit or self.path_is_included(relative_path))
         )
 
     def path_is_included(self, relative_path: str) -> bool:
@@ -161,11 +159,10 @@ class BuilderConfig:
 
                 all_include_patterns.append(include_pattern)
 
-            for relative_path in self.packages:
-                # Matching only at the root requires a forward slash, back slashes do not work. As such,
-                # normalize to forward slashes for consistency.
-                all_include_patterns.append(f"/{relative_path.replace(os.sep, '/')}/")
-
+            all_include_patterns.extend(
+                f"/{relative_path.replace(os.sep, '/')}/"
+                for relative_path in self.packages
+            )
             if all_include_patterns:
                 self.__include_spec = pathspec.GitIgnoreSpec.from_lines(all_include_patterns)
 
@@ -528,14 +525,14 @@ class BuilderConfig:
                 default_versions = self.__builder.get_default_versions()
                 for version in default_versions:
                     all_versions[version] = None
-            else:
-                unknown_versions = set(all_versions) - set(self.__builder.get_version_api())
-                if unknown_versions:
-                    message = (
-                        f'Unknown versions in field `tool.hatch.build.targets.{self.plugin_name}.versions`: '
-                        f'{", ".join(map(str, sorted(unknown_versions)))}'
-                    )
-                    raise ValueError(message)
+            elif unknown_versions := set(all_versions) - set(
+                self.__builder.get_version_api()
+            ):
+                message = (
+                    f'Unknown versions in field `tool.hatch.build.targets.{self.plugin_name}.versions`: '
+                    f'{", ".join(map(str, sorted(unknown_versions)))}'
+                )
+                raise ValueError(message)
 
             self.__versions = list(all_versions)
 
@@ -788,12 +785,14 @@ class BuilderConfig:
         return self.__only_include
 
     def get_distribution_path(self, relative_path: str) -> str:
-        # src/foo/bar.py -> foo/bar.py
-        for source, replacement in self.sources.items():
-            if relative_path.startswith(source):
-                return relative_path.replace(source, replacement, 1)
-
-        return relative_path
+        return next(
+            (
+                relative_path.replace(source, replacement, 1)
+                for source, replacement in self.sources.items()
+                if relative_path.startswith(source)
+            ),
+            relative_path,
+        )
 
     @property
     def vcs_exclusion_files(self) -> dict[str, list[str]]:
@@ -868,9 +867,7 @@ class BuilderConfig:
     @contextmanager
     def set_build_data(self, build_data: dict[str, Any]) -> Generator:
         try:
-            # Include anything the hooks indicate
-            build_artifacts = build_data['artifacts']
-            if build_artifacts:
+            if build_artifacts := build_data['artifacts']:
                 self.build_artifact_spec = pathspec.GitIgnoreSpec.from_lines(build_artifacts)
 
             self.build_force_include.update(normalize_inclusion_map(build_data['force_include'], self.root))

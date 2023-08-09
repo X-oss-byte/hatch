@@ -150,12 +150,10 @@ def _apply_override_to_array(env_name, option, data, source, condition, conditio
             )
             raise TypeError(message)
 
-    if overwrite:
+    if overwrite or option not in new_config and new_array:
         new_config[option] = new_array
     elif option in new_config:
         new_config[option].extend(new_array)
-    elif new_array:
-        new_config[option] = new_array
 
 
 def _apply_override_to_string(env_name, option, data, source, condition, condition_value, new_config, overwrite):

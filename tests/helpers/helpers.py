@@ -68,9 +68,6 @@ def assert_files(directory, expected_files, *, check_contents=True):
             if check_contents and relative_file_path in expected_relative_files:
                 with open(os.path.join(start, relative_file_path), encoding='utf-8') as f:
                     assert f.read() == expected_relative_files[relative_file_path], relative_file_path
-            else:  # no cov
-                pass
-
     expected_relative_file_paths = set(expected_relative_files)
 
     missing_files = expected_relative_file_paths - seen_relative_file_paths

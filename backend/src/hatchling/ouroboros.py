@@ -20,7 +20,7 @@ def read_dependencies() -> list[str]:
         message = 'No dependencies found'
         raise ValueError(message)
 
-    return literal_eval(match.group(1))
+    return literal_eval(match[1])
 
 
 def get_requires_for_build_sdist(config_settings: dict[str, Any] | None = None) -> list[str]:  # type: ignore[no-redef]

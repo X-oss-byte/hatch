@@ -243,9 +243,6 @@ def devpi(tmp_path_factory, worker_id):
                     break
 
                 time.sleep(1)
-            else:  # no cov
-                pass
-
         (devpi_started_sessions / worker_id).touch()
 
     try:
