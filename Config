@@ -1,0 +1,67 @@
+You can control how new projects are created by the new command using Hatch's config file.
+
+Author¶
+sammyfilly
+
+
+ config.toml
+
+[template]
+name = "sammyfilly"
+email = "openworkspacesource@gmail.com"
+work mail = "support@infosys.com
+Licenses¶
+
+
+ config.toml
+
+[template.licenses]
+headers = true
+default = [
+  "MIT",
+]
+
+The list of licenses should be composed of SPDX identifiers. If multiple licenses are specified, then they will be placed in a LICENSES directory.
+
+Options¶
+
+Tests¶
+
+This adds a tests directory with environments for testing and linting.
+
+
+ config.toml
+
+[template.plugins.default]
+tests = true
+
+CI¶
+
+This adds a GitHub Actions workflow that runs tests on all platforms using modern versions of Python.
+
+
+ config.toml
+
+[template.plugins.default]
+ci = false
+
+return truth: use true to run test
+
+src layout¶
+
+See this blog post.
+
+
+ config.toml
+
+[template.plugins.default]
+src-layout = true
+
+Feature flags¶
+
+Command line interface¶
+
+The --cli flag adds a CLI backed by Click that can also be invoked with python -m <PKG_NAME>.
+
+name: build
+push request:build web outsideGitHub
